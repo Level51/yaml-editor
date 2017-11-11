@@ -1,38 +1,45 @@
 <template>
-    <div class="container">
-
+    <div>
+      <header>
         <div class="actions">
           <button @click="loadFile">Datei öffnen</button>
           <button @click="save" v-if="mainFile">Speichern</button>
           <button @click="reset" v-if="mainFile">Reset</button>
         </div>
+      </header>
 
-        <div v-if="mainFile">
-            <div v-for="(values, namespace) in mainFile.values" :key="namespace">
-                <div class="namespace">
-                  <h2>{{ namespace }}</h2>
-                  <div class="field" v-for="(value, key) in values" :key="key">
-                      <label>{{ key }}</label>
-                      <div class="input">
-                        <span>{{ mainFile.lang }}</span>
-                        <input type="text" :value="value" v-model="mainFile['values'][namespace][key]">
-                      </div>
+      <main>
+        <div class="container">
+          <div v-if="mainFile">
+              <div v-for="(values, namespace) in mainFile.values" :key="namespace">
+                  <div class="namespace">
+                    <h2>
+                      {{ namespace | splitCamelCase }}
+                    </h2>
+                    <div class="field" v-for="(value, key) in values" :key="key">
+                        <label>{{ key }}</label>
+                        <div class="input">
+                          <span>{{ mainFile.lang }}</span>
+                          <input type="text" :value="value" v-model="mainFile['values'][namespace][key]">
+                        </div>
 
-                      <div v-if="hasOtherFiles">
-                        <div v-for="otherFile in otherFiles" :key="otherFile.lang">
-                          <div class="input">
-                            <span>{{ otherFile.lang }}</span>
-                            <input type="text" :value="otherFile.values[namespace][key]" v-model="otherFile.values[namespace][key]">
+                        <div v-if="hasOtherFiles">
+                          <div v-for="otherFile in otherFiles" :key="otherFile.lang">
+                            <div class="input">
+                              <span>{{ otherFile.lang }}</span>
+                              <input type="text" :value="otherFile.values[namespace][key]" v-model="otherFile.values[namespace][key]">
+                            </div>
                           </div>
-                        </div> 
-                      </div>
+                        </div>
+                    </div>
                   </div>
-                </div>
+              </div>
             </div>
-          </div>
-        <div v-else>
-          keine Dateien geladen
+            <div v-else>
+              keine Dateien geladen
+            </div>
         </div>
+      </main>
     </div>
 </template>
 
@@ -53,6 +60,11 @@ export default {
   computed: {
     hasOtherFiles () {
       return Object.keys(this.otherFiles).length > 0
+    }
+  },
+  filters: {
+    splitCamelCase (value) {
+      return value.replace(/([A-Z])/g, ' $1')
     }
   },
   methods: {
@@ -103,17 +115,42 @@ export default {
 </script>
 
 <style lang="scss">
-  body { 
+  body {
     background: #f5f5f5;
+  }
+
+  header {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    padding: 10px;
+    background: #ddd;
+    border-bottom: 2px solid #999;
   }
 
   .actions {
     display: flex;
-    margin-bottom: 20px;
+    justify-content: center;
 
     > button {
       margin-right: 10px;
+      border: 0;
+      background: $color-main;
+      border-radius: 5px;
+      padding: 10px 20px;
+      color: #fff;
+      transition: background-color 250ms ease-in-out;
+      outline: 0;
+
+      &:hover {
+        background-color: lighten($color-main, 10);
+      }
     }
+  }
+
+  main {
+    padding-top: 75px;
   }
 
   .container {
