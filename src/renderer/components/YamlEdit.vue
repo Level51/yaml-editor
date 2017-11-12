@@ -42,13 +42,13 @@
                 </div>
               </div>
             </div>
-            <div v-else>
-              keine Dateien geladen
+            <div v-else class="empty-screen">
+              <p>keine Dateien geladen</p>
             </div>
         </div>
       </main>
 
-      <notifications position="top right" :speed="750" />
+      <notifications position="top center" :speed="750" />
 
       <div id="drag-over-container" v-if="dragOver">
         <div>
@@ -101,6 +101,20 @@ export default {
         this.loadFile(ev.dataTransfer.files[0].path)
       } else {
         this.loadOtherFile(ev.dataTransfer.files[0].path)
+      }
+    }
+
+    document.onkeydown = (ev) => {
+      if (this.mainFile && ev.which === 83 && (ev.metaKey || ev.ctrlKey)) {
+        this.save()
+      }
+
+      if (ev.which === 78 && (ev.metaKey || ev.ctrlKey)) {
+        if (!this.mainFile) {
+          this.loadFile()
+        } else {
+          this.loadOtherFile()
+        }
       }
     }
   },
@@ -361,5 +375,11 @@ export default {
     i {
       font-size: 100px;
     }
+  }
+
+  .empty-screen {
+    text-align: center;
+    color: $color-middle-grey;
+    font-size: 30px;
   }
 </style>
