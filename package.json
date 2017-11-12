@@ -1,8 +1,8 @@
 {
-  "name": "vueelectron",
-  "version": "0.0.0",
+  "name": "YamlEdit",
+  "version": "0.0.1",
   "author": "Daniel Kliemsch <dk@lvl51.de>",
-  "description": "An electron-vue project",
+  "description": "A yaml editor on base of vue-electron",
   "license": null,
   "main": "./dist/electron/main.js",
   "scripts": {
@@ -19,13 +19,13 @@
     "postinstall": "npm run lint:fix"
   },
   "build": {
-    "productName": "vueelectron",
-    "appId": "org.simulatedgreg.electron-vue",
+    "productName": "YamlEdit",
+    "appId": "de.dohh.yaml-edit",
     "directories": {
       "output": "build"
     },
     "files": [
-      "dist/electron/**/*"
+      "dist/electron/**/*" YamlEdit
     ],
     "dmg": {
       "contents": [
