@@ -26,18 +26,18 @@
                 </h2>
                 <div class="field" v-for="(value, key) in values" :key="key">
                     <label>{{ key }}</label>
-                    <div class="input">
-                      <span>{{ mainFile.lang }}</span>
-                      <input type="text" :value="value" v-model="mainFile['values'][namespace][key]">
-                    </div>
+                    <div>
+                      <div class="input">
+                        <span>{{ mainFile.lang }}</span>
+                        <input type="text" :value="value" v-model="mainFile['values'][namespace][key]">
+                      </div>
 
-                    <div v-if="hasOtherFiles">
-                      <div v-for="otherFile in otherFiles" :key="otherFile.lang">
-                        <div class="input">
+                      <template v-if="hasOtherFiles">
+                        <div v-for="otherFile in otherFiles" :key="otherFile.lang" class="input">
                           <span>{{ otherFile.lang }}</span>
                           <input type="text" :value="otherFile.values[namespace][key]" v-model="otherFile.values[namespace][key]">
                         </div>
-                      </div>
+                      </template>
                     </div>
                 </div>
               </div>
@@ -49,6 +49,12 @@
       </main>
 
       <notifications position="top right" :speed="750" />
+
+      <div id="drag-over-container" v-if="dragOver">
+        <div>
+          <i class="fa fa-cloud-upload"></i>
+        </div>
+      </div>
     </div>
 </template>
 
@@ -67,7 +73,35 @@ export default {
     return {
       mainFile: null,
       otherFiles: {},
-      notifications: []
+      notifications: [],
+      dragOver: false
+    }
+  },
+  mounted () {
+    let timeout
+
+    document.ondragover = (ev) => {
+      clearTimeout(timeout)
+      ev.preventDefault()
+      this.dragOver = true
+    }
+
+    document.ondragleave = (ev) => {
+      timeout = setTimeout(() => {
+        this.dragOver = false
+      }, 100)
+    }
+
+    document.body.ondrop = (ev) => {
+      ev.preventDefault()
+      this.dragOver = false
+      ev.preventDefault()
+
+      if (this.mainFile === null) {
+        this.loadFile(ev.dataTransfer.files[0].path)
+      } else {
+        this.loadOtherFile(ev.dataTransfer.files[0].path)
+      }
     }
   },
   computed: {
@@ -92,7 +126,7 @@ export default {
     createNotification (title, message = null, type = 'success') {
       this.$notify({
         type,
-        duration: -1,
+        duration: 5000,
         title,
         text: message
       })
@@ -136,45 +170,57 @@ export default {
       })
 
       if (path) {
-        try {
-          let doc = yaml.safeLoad(fs.readFileSync(path[0], 'utf8'))
-          let lang = Object.keys(doc)[0]
+        return this.loadFileFromPath(path[0])
+      }
+    },
 
-          return {
-            doc,
-            lang,
-            path
-          }
-        } catch (e) {
-          console.log(e)
+    /**
+     * Load and parse the yml file from the given path.
+     */
+    loadFileFromPath (path) {
+      try {
+        let doc = yaml.safeLoad(fs.readFileSync(path, 'utf8'))
+        let lang = Object.keys(doc)[0]
+
+        return {
+          doc,
+          lang,
+          path
         }
+      } catch (e) {
+        this.createNotification('Could not load file', e.reason, 'error')
+        return null
       }
     },
 
     /**
      * Load main language file
      */
-    loadFile () {
-      let {doc, lang, path} = this.doLoadFile()
+    loadFile (fromPath) {
+      let result = typeof fromPath === 'string' ? this.loadFileFromPath(fromPath) : this.doLoadFile()
 
-      if (!_.isUndefined(path) && !_.isUndefined(doc)) {
-        this.mainFile = Object.assign({}, this.mainFile, {
-          lang,
-          path: path[0],
-          values: doc[lang]
-        })
+      if (result !== null && !_.isUndefined(result)) {
+        let {doc, lang, path} = result
+
+        if (!_.isUndefined(path) && !_.isUndefined(doc)) {
+          this.mainFile = Object.assign({}, this.mainFile, {
+            lang,
+            path: path,
+            values: doc[lang]
+          })
+        }
       }
     },
 
     /**
      * Load additional language files with the same namespaces/keys for translations
      */
-    loadOtherFile () {
-      let {doc, lang, path} = this.doLoadFile()
+    loadOtherFile (fromPath) {
+      let {doc, lang, path} = typeof fromPath === 'string' ? this.loadFileFromPath(fromPath) : this.doLoadFile()
 
       Vue.set(this.otherFiles, lang, {
         lang,
-        path: path[0],
+        path: path,
         values: Object.assign({}, _.clone(this.mainFile.values), doc[lang])
       })
     }
@@ -296,6 +342,24 @@ export default {
 
     .notification {
       cursor: pointer;
+    }
+  }
+
+  #drag-over-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.3);
+    z-index: 999;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: $color-middle-grey;
+
+    i {
+      font-size: 100px;
     }
   }
 </style>
