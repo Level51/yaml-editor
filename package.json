@@ -1,6 +1,6 @@
 {
   "name": "yaml-editor",
-  "version": "0.0.2",
+  "version": "0.1.0",
   "author": "Daniel Kliemsch <dk@lvl51.de>",
   "description": "A yaml editor on base of vue-electron",
   "license": null,
