@@ -10,5 +10,9 @@
   }
 </script>
 
-<style>
+<style lang="scss">
+#app {
+  display: flex;
+  justify-content: center;
+}
 </style>

@@ -29,13 +29,13 @@
                     <div>
                       <div class="input">
                         <span>{{ mainFile.lang }}</span>
-                        <input type="text" :value="value" v-model="mainFile['values'][namespace][key]">
+                        <textarea :value="value" v-model="mainFile['values'][namespace][key]" cols="75" rows="1"></textarea>
                       </div>
 
                       <template v-if="hasOtherFiles">
                         <div v-for="otherFile in otherFiles" :key="otherFile.lang" class="input">
                           <span>{{ otherFile.lang }}</span>
-                          <input type="text" :value="otherFile.values[namespace][key]" v-model="otherFile.values[namespace][key]">
+                          <textarea :value="otherFile.values[namespace][key]" v-model="otherFile.values[namespace][key]" cols="75" rows="1"></textarea>
                         </div>
                       </template>
                     </div>
@@ -325,7 +325,7 @@ export default {
         margin-bottom: 10px;
         position: relative;
         
-        input {
+        input, textarea {
           padding-left: 40px;
         }
 
@@ -337,16 +337,26 @@ export default {
           border-right: 1px solid $color-middle-grey;
           font-size: 12px;
           color: $color-middle-grey;
+          height: 100%;
         }
+      }
+
+      input, textarea {
+        border-radius: 3px;
+        border: 1px solid $color-middle-grey;;
+        box-shadow: none;
+        padding: 0 10px;
       }
 
       input {
         width: 300px;
         height: 30px;
-        border-radius: 3px;
-        border: 1px solid $color-middle-grey;;
-        box-shadow: none;
-        padding: 0 10px;
+      }
+
+      textarea {
+        resize: vertical;
+        display: block;
+        padding: 8px 10px 8px 40px;
       }
     }
   }
