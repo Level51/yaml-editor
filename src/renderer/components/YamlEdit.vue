@@ -2,29 +2,31 @@
     <div>
       <header>
         <div class="actions">
-          <button @click="loadFile" v-if="!mainFile">
+          <button @click="loadFile()" v-if="!mainFile">
             <i class="fa fa-folder-open-o"></i> Datei öffnen
           </button>
-          <button @click="loadOtherFile" v-if="mainFile">
+          <button @click="loadOtherFile()" v-if="mainFile">
             <i class="fa fa-folder-open-o"></i> zusätzl. Datei öffnen
           </button>
-          <button @click="save" v-if="mainFile">
+          <button @click="save()" v-if="mainFile">
             <i class="fa fa-floppy-o"></i> Speichern
           </button>
-          <button @click="reset" v-if="mainFile">
+          <button @click="reset()" v-if="mainFile">
             <i class="fa fa-eraser"></i> Reset
           </button>
-
-          <button @click="sort" v-if="mainFile">
+          <button @click="sort()" v-if="mainFile">
             <i class="fa fa-sort-alpha-asc"></i> Sortieren
           </button>
+        </div>
+        <div class="actions" v-if="mainFile">
+          <input type="search" v-model="searchTerm" placeholder="Suchen">
         </div>
       </header>
 
       <main>
         <div class="container">
           <div v-if="mainFile">
-              <div v-for="(values, namespace) in mainFile.values" :key="namespace" class="namespace">
+              <div v-for="(values, namespace) in mainValues" :key="namespace" class="namespace">
                 <h2>
                   {{ namespace | splitCamelCase }}
                 </h2>
@@ -52,7 +54,7 @@
         </div>
       </main>
 
-      <notifications position="top center" :speed="750" />
+      <notifications position="bottom center" :speed="750" />
 
       <div id="drag-over-container" v-if="dragOver">
         <div>
@@ -80,7 +82,8 @@ export default {
       mainFile: null,
       otherFiles: {},
       notifications: [],
-      dragOver: false
+      dragOver: false,
+      searchTerm: null
     }
   },
   mounted () {
@@ -127,6 +130,33 @@ export default {
   computed: {
     hasOtherFiles () {
       return Object.keys(this.otherFiles).length > 0
+    },
+    mainValues () {
+      if (!this.mainFile) {
+        return null
+      }
+
+      if (!this.searchTerm || this.searchTerm.length < 3) {
+        return this.mainFile.values
+      }
+
+      let result = {}
+      const searchTerm = this.searchTerm.toLowerCase()
+      _.forEach(this.mainFile.values, (values, namespace) => {
+        if (namespace.toLowerCase().indexOf(searchTerm) !== -1) {
+          result[namespace] = values
+        }
+
+        _.forEach(values, (value, key) => {
+          if (key.toLowerCase().indexOf(searchTerm) !== -1 || value.toLowerCase().indexOf(searchTerm) !== -1) {
+            if (!result.hasOwnProperty(namespace)) {
+              result[namespace] = {}
+            }
+            result[namespace][key] = value
+          }
+        })
+      })
+      return result
     }
   },
   filters: {
@@ -146,7 +176,7 @@ export default {
     createNotification (title, message = null, type = 'success') {
       this.$notify({
         type,
-        duration: 5000,
+        duration: 3000,
         title,
         text: message
       })
@@ -282,6 +312,10 @@ export default {
     display: flex;
     justify-content: center;
 
+    &:not(:first-child) {
+      margin-top: 10px;
+    }
+
     > button {
       margin-right: 10px;
       border: 0;
@@ -300,10 +334,19 @@ export default {
         background-color: lighten($color-main, 10);
       }
     }
+
+    input[type="search"] {
+      -webkit-appearance: none;
+      padding: 5px 10px;
+      border-radius: 3px;
+      border: 1px solid $color-middle-grey;;
+      box-shadow: none;
+      width: 200px;
+    }
   }
 
   main {
-    padding-top: 75px;
+    padding-top: 100px;
   }
 
   .container {
@@ -380,8 +423,6 @@ export default {
   }
 
   .notifications {
-    top: 70px !important;
-
     .notification {
       cursor: pointer;
     }
