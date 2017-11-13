@@ -14,6 +14,10 @@
           <button @click="reset" v-if="mainFile">
             <i class="fa fa-eraser"></i> Reset
           </button>
+
+          <button @click="sort" v-if="mainFile">
+            <i class="fa fa-sort-alpha-asc"></i> Sortieren
+          </button>
         </div>
       </header>
 
@@ -67,6 +71,8 @@ import _ from 'lodash'
 import Notifications from 'vue-notification'
 
 Vue.use(Notifications)
+
+window._ = _
 
 export default {
   data () {
@@ -157,15 +163,19 @@ export default {
     /**
      * Save/dump yaml all open files
      */
-    save () {
+    save (sortKeys = false) {
       fs.writeFileSync(this.mainFile.path, yaml.safeDump({
         [this.mainFile.lang]: this.mainFile.values
+      }, {
+        sortKeys
       }))
 
       if (this.hasOtherFiles) {
         _.forEach(this.otherFiles, file => {
           fs.writeFileSync(file.path, yaml.safeDump({
             [file.lang]: file.values
+          }, {
+            sortKeys
           }))
         })
       }
@@ -236,6 +246,14 @@ export default {
         lang,
         path: path,
         values: Object.assign({}, _.clone(this.mainFile.values), doc[lang])
+      })
+    },
+
+    sort () {
+      this.save(true)
+      this.loadFile(this.mainFile.path)
+      _.forEach(this.otherFiles, file => {
+        this.loadOtherFile(file.path)
       })
     }
   }
