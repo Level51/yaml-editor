@@ -1,5 +1,13 @@
 # Yaml Editor
-Yaml Editor based on [electron-vue](https://github.com/SimulatedGREG/electron-vue).
+Yaml Editor based on [electron-vue](https://github.com/SimulatedGREG/electron-vue).  
+Currently only usefull for editing yml based language files used within [SilverStripe](https://github.com/silverstripe) projects. 
+
+## Features
+- Edit language yml files with [js-yaml](https://github.com/SimulatedGREG/electron-vue)
+- Each value can be edited within it's own textarea, optional "side-by-side" for multiple languages
+- Ensures valid yml syntax on write
+- Sort files by their keys
+- Search files by namespaces, keys and values
 
 ## Development
 
